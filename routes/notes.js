@@ -11,7 +11,7 @@ function verifyToken(req,res,next){
     if(authHeader == undefined){
         res.status(401).send({error:"autherization failed"});
     }
-    let token=authHeader.split(" ").pop()
+    let token=authHeader.split(" ")[1]
     jwt.verify(token,process.env.TOKEN_KEY,function(err,decoded){
         if(err){
             res.status(500).send("authentificatin failed")
@@ -52,12 +52,6 @@ function verifyToken(req,res,next){
  *           description: sample description
  * 
  */
-/**
- * @swagger
- * tags:
- *   name : Notes
- *   description: The notes managing API
- */
 
 
 routes.post("/notes",verifyToken,function(req,res){
@@ -79,20 +73,13 @@ routes.post("/notes",verifyToken,function(req,res){
 
 /**
  * @swagger
- * /notes:
+ * path:
+ * /api/notes/: 
  *   get:
- *     summery: Returns the list of the all notes
- *     tags: [notes]
+ *     summery: Get all notes
  *     resposes:
- *       200:
- *     description: the list of the notes
- *     content: 
- *        application/json: 
- *         schema:
- *          type: array
- *          items:
- *            $ref: '#/components/schemas/Notes'
-  *     
+ *      '200':
+ *       description: the list of notes    
   */
 
 routes.get("/notes",verifyToken,function(req,res){

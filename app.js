@@ -9,7 +9,7 @@ const notesRouter=require("./routes/notes")
 const userRoutes=require("./routes/user")
 const swaggerUi=require("swagger-ui-express")
 const swaggerjsdoc=require("swagger-jsdoc")
-const saltRounds = 10;
+swaggerDocument = require('./swagger.json');
 
 
 const options={
