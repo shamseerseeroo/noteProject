@@ -30,39 +30,41 @@ function verifyToken(req, res, next) {
 /**
  * @swagger
  * components:
- *   schemas:
- *    Notes:
- *       type: object
- *       required:
- *          -title
- *          -content
- *       properties:
- *          title:
- *            type: string
- *            description: the notes title
- *          content:
- *            type: string
- *            description: the notes content  
+ *    schemas:
+ *       db:
+ *        type: object
+ *        properties:
+ *         title:
+ *           type: string
+ *         content:
+ *           type: string
+ *         
+ *       
  */
 
 /**
  * @swagger
- * path:
- * /api/notes: 
- *   post:
- *     summery: create  notes
- *     description: this api is used to create data
- *     requestbody: 
- *           required: true
- *           content:
- *              application/json:
- *           schemas:
- *                 $ref: "#components/schemas/Notes"  
- *     respnoses:
- *      '200':
- *           description: create data successsfully 
- * 
-  */
+ * /api/notes:
+ *  post:
+ *    summary: add name to db
+ *    security:
+ *     - jwt: []
+ *    requestBody:
+ *      required: true
+ *      content:
+ *         application/json:
+ *            schema:
+ *               $ref: '#/components/schemas/db'
+ *    responses:
+ *      200:
+ *         description: saved
+ *         content:
+ *           application/json:
+ *              schema:
+ *                $ref: '#/components/schemas/db'
+ *      500:
+ *         description: Some server error
+ */
 
 
 routes.post("/notes", function (req, res) {
@@ -71,10 +73,12 @@ routes.post("/notes", function (req, res) {
         title: req.body.title,
         content: req.body.content
     })
-    notes.save(function (err) {
+    notes.save(function (err,data) {
+        console.log(data)
         if (!err) {
             res.json("successfully insertion of data")
         } else {
+            console.log(err)
             res.json(err)
         }
 
@@ -82,23 +86,24 @@ routes.post("/notes", function (req, res) {
     });
 });
 
+
 /**
  * @swagger
- * path:
- * /api/notes: 
- *   get:
- *     summery: Get all notes
- *     description: this api is used to fetch data from mongoose database
- *     respnoses:
- *      '200':
- *           description: the list of notes 
- *           content: 
- *                 application/json:
- *                          schemas:
- *                              type: array
- *                              items: 
- *                                   $ref: "#components/schemas/Notes"
-  */
+ * /api/notes:
+ *  get:
+ *    summary: add name to db
+ *    security:
+ *     - jwt: []
+ *    responses:
+ *      200:
+ *         description: saved
+ *         content:
+ *           application/json:
+ *              schema:
+ *                $ref: '#/components/schemas/db'
+ *      500:
+ *         description: Some server error
+ */
 
 routes.get("/notes", function (req, res) {
 
@@ -113,16 +118,21 @@ routes.get("/notes", function (req, res) {
 });
 /**
  * @swagger
- * path:
- * /api/notes: 
- *   delete:
- *     summery: delete all notes
- *     description: this api is used to delete data from mongoose database
- *     respnoses:
- *      '200':
- *           description: data is deleted successfully 
- 
-  */
+ * /api/notes:
+ *  delete:
+ *    summary: delete all note in db
+ *    security:
+ *     - jwt: []
+ *    responses:
+ *      200:
+ *         description: saved
+ *         content:
+ *           application/json:
+ *              schema:
+ *                $ref: '#/components/schemas/db'
+ *      500:
+ *         description: Some server error
+ */
 
 routes.delete("/notes", function (req, res) {
 
@@ -137,30 +147,32 @@ routes.delete("/notes", function (req, res) {
 
 /**
  * @swagger
- * path:
- * /api/notes/{noteTitle}: 
- *   get:
- *     summery: Get all notes
- *     description: this api is used to fetch data from mongoose database
- *     parameters:
- *         -in: path
- *         name: title
- *     required: true
- *     schemas:
- *           type: integer
- *     respnoses:
- *      '200':
- *           description: the list of notes 
- *           content: 
- *                 application/json:
- *                          schema:
- *                              type: array
- *                              items: "#components/schemas/Notes"
-  */
-routes.get("/notes/:noteTitle", function (req, res) {
+ * /api/notes/{notesTitle}:
+ *  get:
+ *    summary: add name to db
+ *    security:
+ *     - jwt: []
+ *    parameters:
+ *        - in: path
+ *          name: notesTitle
+ *          required: true 
+ *          schemas:
+ *             type: integer
+ *    responses:
+ *      200:
+ *         description: saved
+ *         content:
+ *           application/json:
+ *              schema:
+ *                $ref: '#/components/schemas/db'
+ *      500:
+ *         description: Some server error
+ */
+
+routes.get("/notes/:notesTitle", function (req, res) {
 
     console.log(req.headers.authorization)
-    notesModel.findOne({ title: req.params.noteTitle }, function (err, foundTitle) {
+    notesModel.findOne({ title: req.params.notesTitle }, function (err, foundTitle) {
 
         if (!err) {
             res.json(foundTitle)
@@ -170,35 +182,36 @@ routes.get("/notes/:noteTitle", function (req, res) {
         }
     });
 });
+
 /**
  * @swagger
- * path:
- * /api/notes/{notesTitle}: 
- *   put:
- *     summery: update  notes
- *     description: this api is used to update data
- *     parameters:
- *           -in: path
- *           name: id
- *     required: true
- *     schemas:
- *          type: integer
- *     requestbody: 
- *           required: true
- *           content:
- *              application/json:
- *           schemas:
- *                 $ref: "#components/schemas/Notes"  
- *     respnoses:
- *      '200':
- *           description: updated data successsfully 
-*           content: 
- *                 application/json:
- *                          schema:
- *                              type: array
- *                              items: "#components/schemas/Notes"
- * 
-  */
+ * /api/notes/{notesTitle}:
+ *  put:
+ *    summary: add name to db
+ *    security:
+ *     - jwt: []
+ *    parameters:
+ *        - in: path
+ *          name: notesTitle
+ *          required: true 
+ *          schemas:
+ *             type: integer
+ *    requestBody:
+ *      required: true
+ *      content:
+ *         application/json:
+ *            schema:
+ *               $ref: '#/components/schemas/db'
+ *    responses:
+ *      200:
+ *         description: saved
+ *         content:
+ *           application/json:
+ *              schema:
+ *                $ref: '#/components/schemas/db'
+ *      500:
+ *         description: Some server error
+ */
 routes.put("/notes/:notesTitle", function (req, res) {
     notesModel.updateMany({ title: req.params.notesTitle }, { title: req.body.title, content: req.body.content }, function (err, foundUpdate) {
         if (!err) {
