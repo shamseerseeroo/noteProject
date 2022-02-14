@@ -3,13 +3,11 @@ const express = require("express")
 const bodyParser = require("body-parser")
 const mongoose = require("mongoose");
 const bcrypt = require('bcrypt');
-
-
 const notesRouter=require("./routes/notes")
 const userRoutes=require("./routes/user")
 const swaggerUi=require("swagger-ui-express")
 const swaggerjsdoc=require("swagger-jsdoc")
-swaggerDocument = require('./swagger.json');
+
 
 
 const options={
@@ -27,7 +25,7 @@ const options={
         ],
        
     },
-    apis:["./routes/*.js"]
+    apis:["./routes/notes.js"]
 }
 const specs=swaggerjsdoc(options)
 
