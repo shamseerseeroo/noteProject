@@ -1,24 +1,24 @@
 require("dotenv").config();
-const express=require("express")
-const routes=express.Router()
+const express = require("express")
+const routes = express.Router()
 const notesModel = require('../models/notesModel');
-const jwt=require("jsonwebtoken")
+const jwt = require("jsonwebtoken")
 
 
 
-function verifyToken(req,res,next){
-    const authHeader=req.headers.authorization
-    if(authHeader == undefined){
-        res.status(401).send({error:"autherization failed"});
+function verifyToken(req, res, next) {
+    const authHeader = req.headers.authorization
+    if (authHeader == undefined) {
+        res.status(401).send({ error: "autherization failed" });
     }
-    let token=authHeader.split(" ")[1]
-    jwt.verify(token,process.env.TOKEN_KEY,function(err,decoded){
-        if(err){
+    let token = authHeader.split(" ")[1]
+    jwt.verify(token, process.env.TOKEN_KEY, function (err, decoded) {
+        if (err) {
             res.status(500).send("authentificatin failed")
-        }else{
+        } else {
             next()
-         
-    }
+
+        }
     })
 }
 
@@ -30,101 +30,196 @@ function verifyToken(req,res,next){
 /**
  * @swagger
  * components:
- *   schemas:
- *    Notes:
- *       type: object
- *       required:
- *          -title
- *          -content
- *       properties:
- *          id:
- *            type: string
- *            description:  users can create notes
- *          title:
- *            type: string
- *            description: the notes title
- *          content:
- *            type: string
- *            description: the notes content  
- *          examples:
- *           id: f3d_ers
- *           title: sample note title
- *           description: sample description
- * 
+ *    schemas:
+ *       db:
+ *        type: object
+ *        properties:
+ *         title:
+ *           type: string
+ *         content:
+ *           type: string
+ *         
+ *       
+ */
+
+/**
+ * @swagger
+ * /api/notes:
+ *  post:
+ *    summary: add name to db
+ *    security:
+ *     - jwt: []
+ *    requestBody:
+ *      required: true
+ *      content:
+ *         application/json:
+ *            schema:
+ *               $ref: '#/components/schemas/db'
+ *    responses:
+ *      200:
+ *         description: saved
+ *         content:
+ *           application/json:
+ *              schema:
+ *                $ref: '#/components/schemas/db'
+ *      500:
+ *         description: Some server error
  */
 
 
-routes.post("/notes",verifyToken,function(req,res){
-    console.log(req.headers.authorization)
-    const notes=new notesModel({
-        title:req.body.title,
-        content:req.body.content
+routes.post("/notes", function (req, res) {
+
+    const notes = new notesModel({
+        title: req.body.title,
+        content: req.body.content
     })
-    notes.save(function(err){
-        if(!err){
+    notes.save(function (err,data) {
+        console.log(data)
+        if (!err) {
             res.json("successfully insertion of data")
-        }else{
+        } else {
+            console.log(err)
             res.json(err)
         }
-        
-        
+
+
+    });
+});
+
+
+/**
+ * @swagger
+ * /api/notes:
+ *  get:
+ *    summary: add name to db
+ *    security:
+ *     - jwt: []
+ *    responses:
+ *      200:
+ *         description: saved
+ *         content:
+ *           application/json:
+ *              schema:
+ *                $ref: '#/components/schemas/db'
+ *      500:
+ *         description: Some server error
+ */
+
+routes.get("/notes", function (req, res) {
+
+    notesModel.find(function (err, foundItems) {
+        if (!err) {
+            res.json(foundItems)
+            console.log(foundItems)
+        } else {
+            res.json(err)
+        }
+    });
+});
+/**
+ * @swagger
+ * /api/notes:
+ *  delete:
+ *    summary: delete all note in db
+ *    security:
+ *     - jwt: []
+ *    responses:
+ *      200:
+ *         description: saved
+ *         content:
+ *           application/json:
+ *              schema:
+ *                $ref: '#/components/schemas/db'
+ *      500:
+ *         description: Some server error
+ */
+
+routes.delete("/notes", function (req, res) {
+
+    notesModel.deleteMany(function (err) {
+        if (!err) {
+            res.json("deleted all notes successfullyy")
+        } else {
+            res.json(err)
+        }
     });
 });
 
 /**
  * @swagger
- * path:
- * /api/notes/: 
- *   get:
- *     summery: Get all notes
- *     resposes:
- *      '200':
- *       description: the list of notes    
-  */
+ * /api/notes/{notesTitle}:
+ *  get:
+ *    summary: add name to db
+ *    security:
+ *     - jwt: []
+ *    parameters:
+ *        - in: path
+ *          name: notesTitle
+ *          required: true 
+ *          schemas:
+ *             type: integer
+ *    responses:
+ *      200:
+ *         description: saved
+ *         content:
+ *           application/json:
+ *              schema:
+ *                $ref: '#/components/schemas/db'
+ *      500:
+ *         description: Some server error
+ */
 
-routes.get("/notes",verifyToken,function(req,res){
+routes.get("/notes/:notesTitle", function (req, res) {
+
     console.log(req.headers.authorization)
-    notesModel.find(function(err,foundItems){
-      if(!err){  
-        res.json(foundItems)
-    }else{
-        res.json(err)
-    }
-    });
-});
-routes.delete("/notes",verifyToken,function(req,res){
-    
-    notesModel.deleteMany(function(err){
-        if(!err){
-            res.json("deleted all notes successfullyy")
-        }else{
-            res.json(err)
-        }
-    });
-});
+    notesModel.findOne({ title: req.params.notesTitle }, function (err, foundTitle) {
 
-
-routes.get("/notes/:noteTitle",verifyToken,function(req,res){
-         
-    console.log(req.headers.authorization)
-    notesModel.findOne({title:req.params.noteTitle},function(err,foundTitle){
-        
-        if(!err){
+        if (!err) {
             res.json(foundTitle)
             console.log(foundTitle);
-        }else{
+        } else {
             res.json("not found title")
         }
     });
 });
-routes.put("/notes/:notesTitle",verifyToken,function(req,res){
-    notesModel.updateMany({title:req.params.notesTitle},{title:req.body.title,content:req.body.content},function(err,foundUpdate){
-        if(!err){
+
+/**
+ * @swagger
+ * /api/notes/{notesTitle}:
+ *  put:
+ *    summary: add name to db
+ *    security:
+ *     - jwt: []
+ *    parameters:
+ *        - in: path
+ *          name: notesTitle
+ *          required: true 
+ *          schemas:
+ *             type: integer
+ *    requestBody:
+ *      required: true
+ *      content:
+ *         application/json:
+ *            schema:
+ *               $ref: '#/components/schemas/db'
+ *    responses:
+ *      200:
+ *         description: saved
+ *         content:
+ *           application/json:
+ *              schema:
+ *                $ref: '#/components/schemas/db'
+ *      500:
+ *         description: Some server error
+ */
+routes.put("/notes/:notesTitle", function (req, res) {
+    notesModel.updateMany({ title: req.params.notesTitle }, { title: req.body.title, content: req.body.content }, function (err, foundUpdate) {
+        if (!err) {
             res.json(foundUpdate)
-        }else{
+        } else {
             res.json(err)
         }
     });
 });
 
-module.exports=routes;
+module.exports = routes;
